@@ -1,11 +1,12 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
+import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 
 import AppContextStore from '@store/AppContextStore';
 import { UserProps } from '@app-types/user';
 import { getCurrentUser } from '@services/auth';
-import { ProtectedRoute } from '@containers/.';
 
 const roboto = Roboto({ subsets: [], weight: ['400', '500', '700'] });
 
@@ -22,18 +23,27 @@ export default async function RootLayout({
 }) {
   const session = await getCurrentUser();
 
+  const pathname = headers().get('x-url') || '';
+
+  if (Object.keys(session || {}).length === 0 && !pathname.includes('auth')) {
+    redirect('/auth/login');
+  } else if (
+    Object.keys(session || {}).length > 0 &&
+    pathname.includes('auth')
+  ) {
+    redirect('/');
+  }
+
   return (
     <html lang="en">
       <body className={roboto.className}>
-        <ProtectedRoute user={session as UserProps}>
-          <AppContextStore
-            session={{
-              user: session as UserProps,
-            }}
-          >
-            {children}
-          </AppContextStore>
-        </ProtectedRoute>
+        <AppContextStore
+          session={{
+            user: session as UserProps,
+          }}
+        >
+          {children}
+        </AppContextStore>
       </body>
     </html>
   );
