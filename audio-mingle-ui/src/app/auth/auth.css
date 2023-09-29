@@ -1,0 +1,5 @@
+@import '../globals.css';
+
+.am--wrapper {
+  min-height: 100vh;
+}
