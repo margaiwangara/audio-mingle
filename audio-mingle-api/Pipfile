@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+uvicorn = {version = "*", extras = ["standard"]}
+sqlalchemy = "*"
+pydantic-settings = "*"
+mysql-connector-python = "*"
+pydantic = {version = "*", extras = ["email"]}
+requests = "*"
+redis = "*"
+argon2-cffi = "*"
+pyjwt = "*"
+sse-starlette = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

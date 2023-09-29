@@ -23,7 +23,7 @@ export async function apiRequest(method: Method, url: string, data?: any) {
       body: method !== 'GET' ? JSON.stringify(data || {}) : undefined,
     })
       .then((response) => {
-        if (!response.ok) reject();
+        if (!response.ok) reject(Promise.resolve(response.json()));
         return response.json();
       })
       .then((data) => resolve(data))

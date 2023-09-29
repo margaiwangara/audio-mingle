@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useUserContext } from '@store/ctx';
-import { loginUser, registerUser, getCurrentUser } from '@services/auth';
-import { UserProps } from '@app-types/user';
+import { loginUser, registerUser } from '@services/auth';
 
 type AuthFormProps = {
   page?: 'register' | 'login';
@@ -23,6 +22,7 @@ export default function AuthForm({
   btnText,
 }: AuthFormProps) {
   const [values, setValues] = useState(INITIAL_VALUES);
+  const [hasError, setHasError] = useState(false);
 
   const { setUser } = useUserContext();
   const router = useRouter();
@@ -32,19 +32,24 @@ export default function AuthForm({
 
     const { email, password } = values;
 
-    try {
-      // login or register based on path
-      (await page) === 'register'
-        ? registerUser(values)
-        : loginUser({ email, password });
+    setHasError(false);
 
-      setValues(INITIAL_VALUES);
-
-      router.replace('/');
-    } catch (error) {
-      console.log('error', error);
-      setUser({});
+    // login or register based on path
+    let response: Record<string, any> = {};
+    if (page === 'register') {
+      response = (await registerUser(values)) as Record<string, any>;
+    } else if (page === 'login') {
+      response = (await loginUser({ email, password })) as Record<string, any>;
     }
+
+    if (response?.type === 'error') {
+      setHasError(true);
+      return;
+    }
+
+    setValues(INITIAL_VALUES);
+
+    router.replace('/');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -52,6 +57,13 @@ export default function AuthForm({
 
   return (
     <form method="POST" role="form" onSubmit={handleSubmit}>
+      {hasError && (
+        <div className="alert alert-danger fade show">
+          {page === 'register'
+            ? 'Invalid entry. Please check your entries'
+            : 'Invalid credentials'}
+        </div>
+      )}
       {page === 'register' && (
         <div className="mb-3 form-group">
           <div className="input-group-alternative input-group">
@@ -67,6 +79,7 @@ export default function AuthForm({
               name="name"
               value={values.name}
               onChange={handleChange}
+              required
             />
           </div>
         </div>
@@ -80,11 +93,12 @@ export default function AuthForm({
           </div>
           <input
             type="email"
-            placeholder="janedoe@audio-mingle.com"
+            placeholder="janedoe@audiomingle.dev"
             className="form-control"
             name="email"
             value={values.email}
             onChange={handleChange}
+            required
           />
         </div>
       </div>
@@ -103,6 +117,8 @@ export default function AuthForm({
             name="password"
             value={values.password}
             onChange={handleChange}
+            minLength={8}
+            required
           />
         </div>
       </div>

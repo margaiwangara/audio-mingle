@@ -8,7 +8,10 @@ export async function loginUser(props: LoginUserProps) {
 
     return response;
   } catch (error) {
-    return error;
+    return {
+      type: 'error',
+      error,
+    };
   }
 }
 
@@ -18,7 +21,10 @@ export async function registerUser(props: RegisterUserProps) {
 
     return {};
   } catch (error) {
-    return error;
+    return {
+      type: 'error',
+      error,
+    };
   }
 }
 
